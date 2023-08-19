@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
   Disk disk_run;
   StaticBuffer buffer;
   OpenRelTable cache;
-
+  // hello loki
    return FrontendInterface::handleFrontend(argc, argv);
   /*for i = 0 and i = 1 (i.e RELCAT_RELID and ATTRCAT_RELID)
 
