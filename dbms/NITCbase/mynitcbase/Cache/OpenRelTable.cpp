@@ -57,10 +57,13 @@ int OpenRelTable::openRel(char relName[ATTR_SIZE]) {
 
   // relcatRecId stores the rec-id of the relation `relName` in the Relation Catalog.
   RelCacheTable::resetSearchIndex(RELCAT_RELID);
-  BlockAccess::linearSearch(RELCAT_RELID,RELCAT_RELNAME,RELCAT_,)
+  Attribute rec;
+  rec.nVal=RELCAT_REL_NAME_INDEX;
   RecId relcatRecId;
+  relcatRecId=BlockAccess::linearSearch(RELCAT_RELID,relName,rec,EQ);
+  
 
-  if (/* relcatRecId == {-1, -1} */) {
+  if (/* relcatRecId == {-1, -1} */relcatRecId.block==-1 and relcatRecId.slot==-1) {
     // (the relation is not found in the Relation Catalog.)
     return E_RELNOTEXIST;
   }
@@ -71,16 +74,30 @@ int OpenRelTable::openRel(char relName[ATTR_SIZE]) {
       use the Relation Cache entry to set the relId-th entry of the RelCacheTable.
     NOTE: make sure to allocate memory for the RelCacheEntry using malloc()
   */
-
+  
+  RecBuffer relCatBlock(RELCAT_BLOCK);
+  Attribute relCatRecord[RELCAT_NO_ATTRS];
+  relCatBlock.getRecord(relCatRecord,relcatRecId.slot);
+  RelCacheEntry relCacheEntry;
+  RelCacheTable::recordToRelCatEntry(relCatRecord,&relCacheEntry.relCatEntry);
+  relCacheEntry.recId=relcatRecId;
+  RelCacheTable::relCache[relcatRecId.slot]=(struct RelCacheEntry*)malloc(sizeof(RelCacheEntry));
+  *(RelCacheTable::relCache[relcatRecId.slot])=relCacheEntry;
   /****** Setting up Attribute Cache entry for the relation ******/
 
   // let listHead be used to hold the head of the linked list of attrCache entries.
-  AttrCacheEntry* listHead;
+  AttrCacheEntry* listHead,*curr;
 
   /*iterate over all the entries in the Attribute Catalog corresponding to each
   attribute of the relation relName by multiple calls of BlockAccess::linearSearch()
   care should be taken to reset the searchIndex of the relation, ATTRCAT_RELID,
   corresponding to Attribute Catalog before the first call to linearSearch().*/
+  RelCacheTable::resetSearchIndex(ATTRCAT_RELID);
+  Attribute rec1;
+  rec1.nVal=0;
+  RecId attrcatRecId;
+  attrcatRecId=BlockAccess::linearSearch(ATTRCAT_RELID,relName,rec1,EQ);
+
   {
       /* let attrcatRecId store a valid record id an entry of the relation, relName,
       in the Attribute Catalog.*/
