@@ -9,8 +9,7 @@ int main(int argc, char *argv[]) {
   Disk disk_run;
   StaticBuffer buffer;
   OpenRelTable cache;
-  // hello loki
-   return FrontendInterface::handleFrontend(argc, argv);
+  
   /*for i = 0 and i = 1 (i.e RELCAT_RELID and ATTRCAT_RELID)
 
       get the relation catalog entry using RelCacheTable::getRelCatEntry()
@@ -21,21 +20,23 @@ int main(int argc, char *argv[]) {
            in attrCatEntry using AttrCacheTable::getAttrCatEntry()
 
           printf("  %s: %s\n", attrName, attrType);*/
-  //  for(int i=0;i<2;i++){
-  //   RelCatEntry relCatBuff;
-  //   RelCacheTable::getRelCatEntry(i,&relCatBuff);
-  //   printf("Relation: %s\n", relCatBuff.relName);
-  //   for(int j=0;j<relCatBuff.numAttrs;j++){
-  //   AttrCatEntry attrCatBuff;
-  //   AttrCacheTable::getAttrCatEntry(i,j,&attrCatBuff);
-  //   const char* attrType=attrCatBuff.attrType==NUMBER?"NUM":"STR";
-  //     printf("  %s: %s\n", attrCatBuff.attrName,attrType);
-  //    }
-  // }
-  // // load the headers of both the blocks into relCatHeader and attrCatHeader.
-  // // (we will implement these functions later)
-  // relCatBuffer.getHeader(&relCatHeader);
-  // attrCatBuffer.getHeader(&attrCatHeader);
+   for(int i=0;i<2;i++){
+    RelCatEntry relCatBuff;
+    RelCacheTable::getRelCatEntry(i,&relCatBuff);
+    printf("Relation: %s\n", relCatBuff.relName);
+    for(int j=0;j<relCatBuff.numAttrs;j++){
+    AttrCatEntry attrCatBuff;
+    AttrCacheTable::getAttrCatEntry(i,j,&attrCatBuff);
+    const char* attrType=attrCatBuff.attrType==NUMBER?"NUM":"STR";
+      printf("  %s: %s\n", attrCatBuff.attrName,attrType);
+     }
+  }
+ // load the headers of both the blocks into relCatHeader and attrCatHeader.
+  //(we will implement these functions later)
+  // HeadInfo relCatHeader;
+  // HeadInfo attrCatHeader;
+  // relCatBuff.getHeader(&relCatHeader);
+  // attrCatBuff.getHeader(&attrCatHeader);
   // int k = 0;
 
   // for (/* i = 0 to total relation count */int i=0;i<relCatHeader.numEntries;i++) {
