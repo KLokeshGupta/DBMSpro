@@ -4,56 +4,6 @@
 #include <cstring>
 
 using namespace std;
-// the declarations for these functions can be found in "BlockBuffer.h"
-
-// int compareAttrs(union Attribute attr1, union Attribute attr2, int attrType) {
-
-//     double diff;
-//     if(attrType==STRING) diff=strcmp(attr1.sVal,attr2.sVal);
-//     else diff=attr1.nVal-attr2.nVal;
-//     if(diff>0) return 1;
-//     else if(diff<0) return -1;
-//     else return 0;
-//     // if attrType == STRING
-//     //     diff = strcmp(attr1.sval, attr2.sval)
-
-//     // else
-//     //     diff = attr1.nval - attr2.nval
-
-//     /*
-//     if diff > 0 then return 1
-//     if diff < 0 then return -1
-//     if diff = 0 then return 0
-//     */
-// }
-// /* used to get the slotmap from a record block
-// NOTE: this function expects the caller to allocate memory for `*slotMap`
-// */
-// int RecBuffer::getSlotMap(unsigned char *slotMap) {
-//   unsigned char *bufferPtr;
-
-//   // get the starting address of the buffer containing the block using loadBlockAndGetBufferPtr().
-//   int ret = loadBlockAndGetBufferPtr(&bufferPtr);
-//   if (ret != SUCCESS) {
-//     return ret;
-//   }
-
-//   struct HeadInfo head;
-//   // get the header of the block using getHeader() function
-//   getHeader(&head);  
-
-//   int slotCount = /* number of slots in block from header */head.numSlots;
-
-//   // get a pointer to the beginning of the slotmap in memory by offsetting HEADER_SIZE
-//   unsigned char *slotMapInBuffer = bufferPtr + HEADER_SIZE;
-
-//   // copy the values from `slotMapInBuffer` to `slotMap` (size is `slotCount`)
-//   memcpy(slotMap,slotMapInBuffer,slotCount);
-
-//   return SUCCESS;
-// }
-
-/*                    ---STAGE 3 ---                */
 BlockBuffer::BlockBuffer(int blockNum) {
   // initialise this.blockNum with the argument
   this->blockNum=blockNum;
