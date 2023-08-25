@@ -86,7 +86,7 @@ RecId BlockAccess::linearSearch(int relId, char attrName[ATTR_SIZE], union Attri
 
         /* use the attribute offset to get the value of the attribute from
            current record */
-           Attribute record=rec[attrcatbuff.offset];
+           Attribute val=rec[attrcatbuff.offset];
         //    strcpy(record[ATTRCAT_ATTR_NAME_INDEX].sVal,attrcatbuff.attrName);
         //    record[ATTRCAT_ATTR_TYPE_INDEX].nVal=(int)attrcatbuff.attrType;
         //    record[ATTRCAT_PRIMARY_FLAG_INDEX].nVal=(bool)attrcatbuff.primaryFlag;
@@ -96,7 +96,7 @@ RecId BlockAccess::linearSearch(int relId, char attrName[ATTR_SIZE], union Attri
         int cmpVal;  // will store the difference between the attributes
         // set cmpVal using compareAttrs()
         
-        cmpVal=compareAttrs(record,attrVal,attrcatbuff.attrType);
+        cmpVal=compareAttrs(val,attrVal,attrcatbuff.attrType);
         /* Next task is to check whether this record satisfies the given condition.
            It is determined based on the output of previous comparison and
            the op value received.
