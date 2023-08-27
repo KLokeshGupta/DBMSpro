@@ -6,6 +6,50 @@
 using namespace std;
 // the declarations for these functions can be found in "BlockBuffer.h"
 
+int RecBuffer::setRecord(union Attribute *rec, int slotNum) {
+    unsigned char *bufferPtr;
+    /* get the starting address of the buffer containing the block
+       using loadBlockAndGetBufferPtr(&bufferPtr). */
+    int ret=loadBlockAndGetBufferPtr(&bufferPtr);
+    if(ret!=SUCCESS) return ret;
+    HeadInfo header;
+    getHeader(&header);
+    if(header.numSlots<slotNum) return E_OUTOFBOUND;
+    unsigned char *offset;
+    int recordsize=header.numAttrs*ATTR_SIZE;
+    offset=bufferPtr+HEADER_SIZE+header.numSlots+(recordsize*slotNum);
+
+    memcpy(offset,rec,header.numAttrs*(ATTR_SIZE));
+    StaticBuffer::setDirtyBit(this->blockNum);
+    return SUCCESS;
+    // if loadBlockAndGetBufferPtr(&bufferPtr) != SUCCESS
+        // return the value returned by the call.
+
+    /* get the header of the block using the getHeader() function */
+
+    // get number of attributes in the block.
+
+    // get the number of slots in the block.
+
+    // if input slotNum is not in the permitted range return E_OUTOFBOUND.
+
+    /* offset bufferPtr to point to the beginning of the record at required
+       slot. the block contains the header, the slotmap, followed by all
+       the records. so, for example,
+       record at slot x will be at bufferPtr + HEADER_SIZE + (x*recordSize)
+       copy the record from `rec` to buffer using memcpy
+       (hint: a record will be of size ATTR_SIZE * numAttrs)
+    */
+
+    // update dirty bit using setDirtyBit()
+
+    /* (the above function call should not fail since the block is already
+       in buffer and the blockNum is valid. If the call does fail, there
+       exists some other issue in the code) */
+
+    // return SUCCESS
+}
+
 int compareAttrs(union Attribute attr1, union Attribute attr2, int attrType) {
 
     double diff;
@@ -141,9 +185,17 @@ int BlockBuffer::loadBlockAndGetBufferPtr(unsigned char **buffPtr) {
 
     Disk::readBlock(StaticBuffer::blocks[bufferNum], this->blockNum);
   }
-
+  else{
+    for(int bufferindex=0;bufferindex<BUFFER_CAPACITY;bufferindex++){
+      if(!StaticBuffer::metainfo[bufferindex].free){
+        StaticBuffer::metainfo[bufferindex].timeStamp+=1;
+      }
+    }
+    StaticBuffer::metainfo[bufferNum].timeStamp=0;
+  }
   // store the pointer to this buffer (blocks[bufferNum]) in *buffPtr
   *buffPtr = StaticBuffer::blocks[bufferNum];
+  
 
   return SUCCESS;
 }
