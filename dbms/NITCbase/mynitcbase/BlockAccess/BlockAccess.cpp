@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <bits/stdc++.h>
 RecId BlockAccess::linearSearch(int relId, char attrName[ATTR_SIZE], union Attribute attrVal, int op) {
     // get the previous search index of the relation relId from the relation cache
     // (use RelCacheTable::getSearchIndex() function)
@@ -60,6 +61,7 @@ RecId BlockAccess::linearSearch(int relId, char attrName[ATTR_SIZE], union Attri
         {
             // update block = right block of block
             // update slot = 0
+           // std::cout<<slot;
             block=head.rblock;
             slot=0;
             continue;  // continue to the beginning of this while loop
