@@ -1,6 +1,7 @@
 #include "Schema.h"
 
 #include <cmath>
+#include <bits/stdc++.h>
 #include <cstring>
 int Schema::openRel(char relName[ATTR_SIZE]) {
   int ret = OpenRelTable::openRel(relName);
@@ -8,7 +9,7 @@ int Schema::openRel(char relName[ATTR_SIZE]) {
   // the OpenRelTable::openRel() function returns the rel-id if successful
   // a valid rel-id will be within the range 0 <= relId < MAX_OPEN and any
   // error codes will be negative
-  if(ret >= 0||ret<MAX_OPEN){
+  if(ret >= 0 and ret<MAX_OPEN){
     return SUCCESS;
   }
 
