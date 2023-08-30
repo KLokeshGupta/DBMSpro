@@ -13,8 +13,10 @@ StaticBuffer::StaticBuffer() {
     metainfo[bufferIndex].dirty=false;
     metainfo[bufferIndex].timeStamp=-1;
   }
-  for(int i=0;i<4;i++){
-    Disk::readBlock(blocks[i],i);
+  for(int i=0;i<BLOCK_ALLOCATION_MAP_SIZE;i++){
+    unsigned char blo[BLOCK_SIZE];
+    Disk::readBlock(blo,i);
+    memcpy(blockAllocMap+(i*(BLOCK_SIZE)),blo,BLOCK_SIZE);
   }
 }
 
@@ -26,7 +28,9 @@ subsequent stages, we will implement the write-back functionality here.
 */
 StaticBuffer::~StaticBuffer() {
   for(int index=0;index<4;index++){
-    Disk::writeBlock(blocks[index],index);
+    unsigned char blo[BLOCK_SIZE];
+    memcpy(blo,blockAllocMap+(index*BLOCK_SIZE),BLOCK_SIZE);
+    Disk::writeBlock(blo,index);
   }
   for(int bufferIndex=0;bufferIndex<BUFFER_CAPACITY;bufferIndex++){
     if(!metainfo[bufferIndex].free){
@@ -123,7 +127,7 @@ int StaticBuffer::getFreeBuffer(int blockNum) {
 */
 int StaticBuffer::getBufferNum(int blockNum) {
   // Check if blockNum is valid (between zero and DISK_BLOCKS)
-  if(blockNum<0 || blockNum >DISK_BLOCKS) return E_OUTOFBOUND;
+  if(blockNum<0 || blockNum >=DISK_BLOCKS) return E_OUTOFBOUND;
   // and return E_OUTOFBOUND if not valid.
     for(int bufferIndex=0;bufferIndex<BUFFER_CAPACITY;bufferIndex++){
         if(metainfo[bufferIndex].blockNum==blockNum) return bufferIndex;

@@ -5,6 +5,38 @@
 
 using namespace std;
 // the declarations for these functions can be found in "BlockBuffer.h"
+int BlockBuffer::getBlockNum(){
+
+    //return corresponding block number.
+    return (this->blockNum);
+}
+int RecBuffer::setSlotMap(unsigned char *slotMap) {
+    unsigned char *bufferPtr;
+    /* get the starting address of the buffer containing the block using
+       loadBlockAndGetBufferPtr(&bufferPtr). */
+    int ret=loadBlockAndGetBufferPtr(&bufferPtr);
+    if(ret!=SUCCESS) return ret;
+    // if loadBlockAndGetBufferPtr(&bufferPtr) != SUCCESS
+        // return the value returned by the call.
+    HeadInfo head;
+    getHeader(&head);
+    // get the header of the block using the getHeader() function
+
+    int numSlots = head.numSlots;
+
+    // the slotmap starts at bufferPtr + HEADER_SIZE. Copy the contents of the
+    // argument `slotMap` to the buffer replacing the existing slotmap.
+    // Note that size of slotmap is `numSlots`
+    bufferPtr+=HEADER_SIZE;
+    memcpy(bufferPtr,slotMap,numSlots);
+    ret=StaticBuffer::setDirtyBit(this->blockNum);
+    if(ret!=SUCCESS) return ret;
+    return SUCCESS;
+    // update dirty bit using StaticBuffer::setDirtyBit
+    // if setDirtyBit failed, return the value returned by the call
+
+    // return SUCCESS
+}
 RecBuffer::RecBuffer() : BlockBuffer('R'){}
 // call parent non-default constructor with 'R' denoting record block.
 BlockBuffer::BlockBuffer(char blockType){
@@ -124,7 +156,7 @@ int RecBuffer::setRecord(union Attribute *rec, int slotNum) {
     if(ret!=SUCCESS) return ret;
     HeadInfo header;
     getHeader(&header);
-    if(header.numSlots<slotNum) return E_OUTOFBOUND;
+    if(header.numSlots<=slotNum) return E_OUTOFBOUND;
     unsigned char *offset;
     int recordsize=header.numAttrs*ATTR_SIZE;
     offset=bufferPtr+HEADER_SIZE+header.numSlots+(recordsize*slotNum);
