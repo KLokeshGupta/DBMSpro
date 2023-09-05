@@ -5,55 +5,6 @@
 
 OpenRelTableMetaInfo OpenRelTable::tableMetaInfo[MAX_OPEN];
 
-int OpenRelTable::getFreeOpenRelTableEntry() {
-
-  /* traverse through the tableMetaInfo array,
-    find a free entry in the Open Relation Table.*/
-  for(int i=0;i<MAX_OPEN;i++){
-    if(tableMetaInfo[i].free==true) return i;
-  }
-  return E_CACHEFULL;
-  // if found return the relation id, else return E_CACHEFULL.
-}
-int OpenRelTable::getRelId(char relName[ATTR_SIZE]) {
-
-  /* traverse through the tableMetaInfo array,
-    find the entry in the Open Relation Table corresponding to relName.*/
-
-  // if found return the relation id, else indicate that the relation do not
-  // have an entry in the Open Relation Table.
-  for(int i=0;i<MAX_OPEN;i++){    
-    if(!strcmp(relName,tableMetaInfo[i].relName)) return i;
-    // else E_RELNOTOPEN;
-  }
-  // if(!strcmp(relName,"Students")) return 2;
-  // if(!strcmp(relName,RELCAT_RELNAME)) return 0;
-  // if(!strcmp(relName,ATTRCAT_RELNAME)) return 1;
-  return E_RELNOTOPEN;
-}
-// int OpenRelTable::closeRel(int relId) {
-//   if (/* rel-id corresponds to relation catalog or attribute catalog*/(relId==RELCAT_RELID) or (relId==ATTRCAT_RELID)) {
-//     return E_NOTPERMITTED;
-//   }
-
-//   if (/* 0 <= relId < MAX_OPEN */(relId<0) or (relId>=MAX_OPEN)) {
-//     return E_OUTOFBOUND;
-//   }
-
-//   if (/* rel-id corresponds to a free slot*/tableMetaInfo[relId].free==true) {
-//     return E_RELNOTOPEN;
-//   }
-
-//   // free the memory allocated in the relation and attribute caches which was
-//   // allocated in the OpenRelTable::openRel() function
-//   // OpenRelTable::openRel(tableMetaInfo[relId])
-//   tableMetaInfo[relId].free=true;
-//   // update `tableMetaInfo` to set `relId` as a free slot
-//   // update `relCache` and `attrCache` to set the entry at `relId` to nullptr
-//   (RelCacheTable::relCache[relId])=nullptr;
-//   (AttrCacheTable::attrCache[relId])=nullptr;
-//   return SUCCESS;
-// }
 int OpenRelTable::closeRel(int relId) {
   // confirm that rel-id fits the following conditions
   //     2 <=relId < MAX_OPEN
@@ -72,12 +23,12 @@ int OpenRelTable::closeRel(int relId) {
   }
   /****** Releasing the Relation Cache entry of the relation ******/
 
-  if (/* RelCatEntry of the relId-th Relation Cache entry has been modified */RelCacheTable::relCache[relId]->dirty)
+  if (RelCacheTable::relCache[relId]->dirty)
   {
 
     /* Get the Relation Catalog entry from RelCacheTable::relCache
     Then convert it to a record using RelCacheTable::relCatEntryToRecord(). */
-    Attribute rec[RELCAT_NO_ATTRIBUTES_INDEX];
+    Attribute rec[RELCAT_NO_ATTRS];
     RelCacheTable::relCatEntryToRecord(&(RelCacheTable::relCache[relId]->relCatEntry),rec);
     RecId recId=RelCacheTable::relCache[relId]->recId;
     // declaring an object of RecBuffer class to write back to the buffer
@@ -120,7 +71,27 @@ int OpenRelTable::closeRel(int relId) {
   // update `metainfo` to set `relId` as a free slot
   
   tableMetaInfo[relId].free=true;
+  RelCacheTable::relCache[relId]=nullptr;
+  AttrCacheTable::attrCache[relId]=nullptr;
+  strcpy(tableMetaInfo[relId].relName,"null");
   return SUCCESS;
+}
+OpenRelTable::~OpenRelTable() {
+
+  // close all open relations (from rel-id = 2 onwards. Why?)
+  int k=0;
+  for (int i = 2; i < MAX_OPEN; ++i) {
+    k++;
+    if (!tableMetaInfo[i].free) {
+      OpenRelTable::closeRel(i); // we will implement this function later  
+    }
+  }
+
+  // free the memory allocated for rel-id 0 and 1 in the caches
+  free(RelCacheTable::relCache[0]);
+  free(RelCacheTable::relCache[1]);
+  free(AttrCacheTable::attrCache[0]);
+  free(AttrCacheTable::attrCache[1]);
 }
 int OpenRelTable::openRel(char relName[ATTR_SIZE]) {
   int k=OpenRelTable::getRelId(relName);
@@ -326,22 +297,31 @@ OpenRelTable::OpenRelTable() {
 }
 
 
-OpenRelTable::~OpenRelTable() {
+int OpenRelTable::getFreeOpenRelTableEntry() {
 
-  // close all open relations (from rel-id = 2 onwards. Why?)
-  int k=0;
-  for (int i = 2; i < MAX_OPEN; i++) {
-    k++;
-    if (!tableMetaInfo[i].free) {
-      OpenRelTable::closeRel(i); // we will implement this function later  
-    }
+  /* traverse through the tableMetaInfo array,
+    find a free entry in the Open Relation Table.*/
+  for(int i=0;i<MAX_OPEN;i++){
+    if(tableMetaInfo[i].free==true) return i;
   }
+  return E_CACHEFULL;
+  // if found return the relation id, else return E_CACHEFULL.
+}
+int OpenRelTable::getRelId(char relName[ATTR_SIZE]) {
 
-  // free the memory allocated for rel-id 0 and 1 in the caches
-  free(RelCacheTable::relCache[0]);
-  free(RelCacheTable::relCache[1]);
-  free(AttrCacheTable::attrCache[0]);
-  free(AttrCacheTable::attrCache[1]);
+  /* traverse through the tableMetaInfo array,
+    find the entry in the Open Relation Table corresponding to relName.*/
+
+  // if found return the relation id, else indicate that the relation do not
+  // have an entry in the Open Relation Table.
+  for(int i=0;i<MAX_OPEN;i++){    
+    if(!strcmp(relName,tableMetaInfo[i].relName) and !tableMetaInfo[i].free) return i;
+    // else E_RELNOTOPEN;
+  }
+  // if(!strcmp(relName,"Students")) return 2;
+  // if(!strcmp(relName,RELCAT_RELNAME)) return 0;
+  // if(!strcmp(relName,ATTRCAT_RELNAME)) return 1;
+  return E_RELNOTOPEN;
 }
 
 

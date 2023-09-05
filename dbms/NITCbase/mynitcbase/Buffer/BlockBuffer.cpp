@@ -2,7 +2,7 @@
 
 #include <cstdlib>
 #include <cstring>
-
+#include <iostream>
 using namespace std;
 // the declarations for these functions can be found in "BlockBuffer.h"
 int BlockBuffer::getBlockNum(){
@@ -40,7 +40,12 @@ int RecBuffer::setSlotMap(unsigned char *slotMap) {
 RecBuffer::RecBuffer() : BlockBuffer('R'){}
 // call parent non-default constructor with 'R' denoting record block.
 BlockBuffer::BlockBuffer(char blockType){
+  if(blockType=='R') blockType=REC;
+  else blockType=UNUSED_BLK;
   int block1=getFreeBlock(blockType);
+  if(block1<0 or block1>=DISK_BLOCKS){
+    std::cout<<"error:block not available";
+  }
   this->blockNum=block1;
 
     // allocate a block on the disk and a buffer in memory to hold the new block of
@@ -68,7 +73,11 @@ int BlockBuffer::getFreeBlock(int blockType){
     // if no block is free, return E_DISKFULL.
     if(block1==-111) return E_DISKFULL;
     this->blockNum=block1;
-    StaticBuffer::getFreeBuffer(this->blockNum);
+    int bufferindex=StaticBuffer::getFreeBuffer(this->blockNum);
+    if(bufferindex<0 or bufferindex>=BUFFER_CAPACITY){
+      printf("error:buffer is full");
+      return bufferindex;
+    }
     struct HeadInfo head;
     head.pblock=-1;
     head.lblock=-1;
@@ -157,12 +166,16 @@ int RecBuffer::setRecord(union Attribute *rec, int slotNum) {
     HeadInfo header;
     getHeader(&header);
     if(header.numSlots<=slotNum) return E_OUTOFBOUND;
-    unsigned char *offset;
+  //  unsigned char *offset;
     int recordsize=header.numAttrs*ATTR_SIZE;
-    offset=bufferPtr+HEADER_SIZE+header.numSlots+(recordsize*slotNum);
+    unsigned char* offset=bufferPtr+HEADER_SIZE+header.numSlots+(recordsize*slotNum);
 
     memcpy(offset,rec,header.numAttrs*(ATTR_SIZE));
-    StaticBuffer::setDirtyBit(this->blockNum);
+    int ret12=StaticBuffer::setDirtyBit(this->blockNum);
+    if(ret12!=SUCCESS) {
+      std::cout<<"error";
+      exit(1);
+    }
     return SUCCESS;
     // if loadBlockAndGetBufferPtr(&bufferPtr) != SUCCESS
         // return the value returned by the call.

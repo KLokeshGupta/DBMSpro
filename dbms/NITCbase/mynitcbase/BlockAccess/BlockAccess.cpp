@@ -16,14 +16,13 @@ int BlockAccess::insert(int relId, Attribute *record) {
     int numOfSlots = /* number of slots per record block */relCatEntry.numSlotsPerBlk;
     int numOfAttributes = /* number of attributes of the relation */relCatEntry.numAttrs;
 
-    int prevBlockNum = /* block number of the last element in the linked list = -1 */relCatEntry.lastBlk;
-
+    int prevBlockNum =  relCatEntry.lastBlk;
+    /* block number of the last element in the linked list = -1 */
     /*
         Traversing the linked list of existing record blocks of the relation
         until a free slot is found OR
         until the end of the list is reached
     */
-   int flag=0;
     while (blockNum != -1) {
         // create a RecBuffer object for blockNum (using appropriate constructor!)
         RecBuffer rec(blockNum);
@@ -34,16 +33,15 @@ int BlockAccess::insert(int relId, Attribute *record) {
         // get header of block(blockNum) using RecBuffer::getHeader() function
 
         // get slot map of block(blockNum) using RecBuffer::getSlotMap() function
-        RecId recid;
         
         for(int i=0;i<numOfSlots;i++){
             if(slotmap[i]==SLOT_UNOCCUPIED){
-                recid.slot=i;
-                recid.block=blockNum;
-                flag=1;
+                rec_id.slot=i;
+                rec_id.block=blockNum;
                 break;
             }
         }
+        if(rec_id.block!=-1 and rec_id.slot!=-1) break;
         prevBlockNum=blockNum;
         blockNum=head.rblock;
         // search for free slot in the block 'blockNum' and store it's rec-id in rec_id
@@ -63,11 +61,11 @@ int BlockAccess::insert(int relId, Attribute *record) {
     }
 
     //  if no free slot is found in existing record blocks (rec_id = {-1, -1})
-    if(flag==0)
+    if(rec_id.block==-1 and rec_id.slot==-1)
     {
         // if relation is RELCAT, do not allocate any more blocks
         //     return E_MAXRELATIONS;
-        if(!strcmp(relCatEntry.relName,RELCAT_ATTR_RELNAME)) return E_MAXRELATIONS;
+        if(relId==RELCAT_RELID) return E_MAXRELATIONS;
         RecBuffer newblock;
         int ret2=newblock.getBlockNum();
         // Otherwise,
