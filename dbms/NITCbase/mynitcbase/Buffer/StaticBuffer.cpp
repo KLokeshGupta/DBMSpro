@@ -87,7 +87,7 @@ int StaticBuffer::getFreeBuffer(int blockNum) {
             break;
          }
      }
-     if(bufferNum==99){
+     if(bufferNum==999){
       if(metainfo[ind].dirty){
         Disk::writeBlock(StaticBuffer::blocks[ind],metainfo[ind].blockNum);
       }
