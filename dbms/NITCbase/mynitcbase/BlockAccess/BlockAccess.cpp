@@ -29,8 +29,8 @@ int BlockAccess::deleteRelation(char relName[ATTR_SIZE]) {
     Attribute relCatEntryRecord[RELCAT_NO_ATTRS];
     /* store the relation catalog record corresponding to the relation in
        relCatEntryRecord using RecBuffer.getRecord */
-    RecBuffer recBuffer(recId.block);
-    recBuffer.getRecord(relCatEntryRecord,recId.slot);
+    RecBuffer relCatBuffer(recId.block);
+    relCatBuffer.getRecord(relCatEntryRecord,recId.slot);
     int firstblk=relCatEntryRecord[RELCAT_FIRST_BLOCK_INDEX].nVal;
     int numAttrs=relCatEntryRecord[RELCAT_NO_ATTRIBUTES_INDEX].nVal;
     /* get the first record block of the relation (firstBlock) using the
@@ -47,15 +47,13 @@ int BlockAccess::deleteRelation(char relName[ATTR_SIZE]) {
     //     release the block using BlockBuffer.releaseBlock
     //
     //     Hint: to know if we reached the end, check if nextBlock = -1
-    int currblk=firstblk,rightblk=-1;
-    while(true){
+    int currblk=firstblk;
+    while(currblk!=-1){
         HeadInfo header;
         RecBuffer rec(currblk);
         rec.getHeader(&header);
-        rightblk=header.rblock;
+        currblk=header.rblock;
         rec.releaseBlock();
-        if(rightblk==-1) break;
-        currblk=rightblk;
     }
 
     /***
@@ -79,26 +77,26 @@ int BlockAccess::deleteRelation(char relName[ATTR_SIZE]) {
         // create a RecBuffer for attrCatRecId.block
         // get the header of the block
         // get the record corresponding to attrCatRecId.slot
-        RecBuffer recbuffer(attrCatRecId.block);
+        RecBuffer attrCatbuffer(attrCatRecId.block);
         HeadInfo attrheader;
-        recbuffer.getHeader(&attrheader);
-        Attribute rec[ATTRCAT_NO_ATTRS];
-        recbuffer.getRecord(rec,attrCatRecId.slot);
+        attrCatbuffer.getHeader(&attrheader);
+        Attribute attrCatrec[ATTRCAT_NO_ATTRS];
+        attrCatbuffer.getRecord(attrCatrec,attrCatRecId.slot);
         // declare variable rootBlock which will be used to store the root
         // block field from the attribute catalog record.
         Attribute val;
-        val=rec[ATTRCAT_ROOT_BLOCK_INDEX];
-        int rootBlock = /* get root block from the record */val.nVal;
+        val=attrCatrec[ATTRCAT_ROOT_BLOCK_INDEX];
+        int rootBlock = val.nVal;
         // (This will be used later to delete any indexes if it exists)
         
         // Update the Slotmap for the block by setting the slot as SLOT_UNOCCUPIED
         // Hint: use RecBuffer.getSlotMap and RecBuffer.setSlotMap
         unsigned char *slotmap=(unsigned char*)malloc(attrheader.numSlots*sizeof(unsigned char));
-        recbuffer.getSlotMap(slotmap);
+        attrCatbuffer.getSlotMap(slotmap);
         slotmap[attrCatRecId.slot]=SLOT_UNOCCUPIED;
-        recbuffer.setSlotMap(slotmap);
+        attrCatbuffer.setSlotMap(slotmap);
         attrheader.numEntries-=1;
-        recbuffer.setHeader(&attrheader);
+        attrCatbuffer.setHeader(&attrheader);
         /* Decrement the numEntries in the header of the block corresponding to
            the attribute catalog entry and then set back the header
            using RecBuffer.setHeader */
@@ -132,6 +130,8 @@ int BlockAccess::deleteRelation(char relName[ATTR_SIZE]) {
                 // (the block being released is the "Last Block" of the relation.)
                 /* update the Relation Catalog entry's LastBlock field for this
                    relation with the block number of the previous block. */
+                   RelCatEntry relCatEntryBuffer;
+                   RelCacheTable::getRelCatEntry(ATTRCAT_RELID,&relCatEntryBuffer);
                 relCatEntryRecord[RELCAT_LAST_BLOCK_INDEX].nVal=lblk;
                 
             }
@@ -139,7 +139,7 @@ int BlockAccess::deleteRelation(char relName[ATTR_SIZE]) {
             // (Since the attribute catalog will never be empty(why?), we do not
             //  need to handle the case of the linked list becoming empty - i.e
             //  every block of the attribute catalog gets released.)
-
+            attrCatbuffer.releaseBlock();
             // call releaseBlock()
         }
 
@@ -153,17 +153,18 @@ int BlockAccess::deleteRelation(char relName[ATTR_SIZE]) {
     /*** Delete the entry corresponding to the relation from relation catalog ***/
     // Fetch the header of Relcat block
     HeadInfo relCatHeader;
-    recBuffer.getHeader(&relCatHeader);
+    relCatBuffer.getHeader(&relCatHeader);
     relCatHeader.numEntries-=1;
-    recBuffer.setHeader(&relCatHeader);
+    relCatBuffer.setHeader(&relCatHeader);
     /* Decrement the numEntries in the header of the block corresponding to the
        relation catalog entry and set it back */
 
     /* Get the slotmap in relation catalog, update it by marking the slot as
        free(SLOT_UNOCCUPIED) and set it back. */
     unsigned char* slotmap=(unsigned char*)malloc(relCatHeader.numSlots*sizeof(ATTR_SIZE));
+    relCatBuffer.getSlotMap(slotmap);
     slotmap[recId.slot]=SLOT_UNOCCUPIED;
-    recBuffer.setSlotMap(slotmap);
+    relCatBuffer.setSlotMap(slotmap);
     /*** Updating the Relation Cache Table ***/
     /** Update relation catalog record entry (number of records in relation
         catalog is decreased by 1) **/
