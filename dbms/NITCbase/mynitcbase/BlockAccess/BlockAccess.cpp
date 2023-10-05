@@ -3,7 +3,101 @@
 #include <cstring>
 #include <cstdlib>
 #include <bits/stdc++.h>
+/*
+NOTE: the caller is expected to allocate space for the argument `record` based
+      on the size of the relation. This function will only copy the result of
+      the projection onto the array pointed to by the argument.
+*/
+int BlockAccess::project(int relId, Attribute *record) {
+    // get the previous search index of the relation relId from the relation
+    // cache (use RelCacheTable::getSearchIndex() function)
 
+    // declare block and slot which will be used to store the record id of the
+    // slot we need to check.
+    RecId prevRecId;
+    int retVal=RelCacheTable::getSearchIndex(relId,&prevRecId);
+    if(retVal!=SUCCESS) return retVal;
+    int block, slot;
+    /* if the current search index record is invalid(i.e. = {-1, -1})
+       (this only happens when the caller reset the search index)
+    */
+    if (prevRecId.block == -1 && prevRecId.slot == -1)
+    {
+        // (new project operation. start from beginning)
+
+        // get the first record block of the relation from the relation cache
+        // (use RelCacheTable::getRelCatEntry() function of Cache Layer)
+
+        // block = first record block of the relation
+        // slot = 0
+        RelCatEntry relCatEntry;
+        RelCacheTable::getRelCatEntry(relId,&relCatEntry);
+        block=relCatEntry.firstBlk;
+        slot=0;
+    }
+    else
+    {
+        // (a project/search operation is already in progress)
+
+        // block = previous search index's block
+        // slot = previous search index's slot + 1
+        block=prevRecId.block;
+        slot=prevRecId.slot+1;
+    }
+
+
+    // The following code finds the next record of the relation
+    /* Start from the record id (block, slot) and iterate over the remaining
+       records of the relation */
+    while (block != -1)
+    {
+        // create a RecBuffer object for block (using appropriate constructor!)
+
+        // get header of the block using RecBuffer::getHeader() function
+        // get slot map of the block using RecBuffer::getSlotMap() function
+        RecBuffer rec1(block);
+        HeadInfo header1;
+        rec1.getHeader(&header1);
+        unsigned char slotmap[header1.numSlots];
+
+        if(/* slot >= the number of slots per block*/slot>=header1.numSlots)
+        {
+            // (no more slots in this block)
+            // update block = right block of block
+            // update slot = 0
+            // (NOTE: if this is the last block, rblock would be -1. this would
+            //        set block = -1 and fail the loop condition )
+            block=header1.rblock;
+            slot=0;
+        }
+        else if (/* slot is free */slotmap[slot]==SLOT_UNOCCUPIED)
+        { // (i.e slot-th entry in slotMap contains SLOT_UNOCCUPIED)
+            slot++;
+            // increment slot
+        }
+        else {
+            // (the next occupied slot / record has been found)
+            break;
+        }
+    }
+
+    if (block == -1){
+        // (a record was not found. all records exhausted)
+        return E_NOTFOUND;
+    }
+
+    // declare nextRecId to store the RecId of the record found
+    RecId nextRecId{block, slot};
+
+    // set the search index to nextRecId using RelCacheTable::setSearchIndex
+    RelCacheTable::setSearchIndex(relId,&nextRecId);
+    /* Copy the record with record id (nextRecId) to the record buffer (record)
+       For this Instantiate a RecBuffer class object by passing the recId and
+       call the appropriate method to fetch the record
+    */
+
+    return SUCCESS;
+}
 int BlockAccess::deleteRelation(char relName[ATTR_SIZE]) {
     // if the relation to delete is either Relation Catalog or Attribute Catalog,
     //     return E_NOTPERMITTED
@@ -212,6 +306,7 @@ int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], 
        call the appropriate method to fetch the record
     */
     RecBuffer rec(recId.block);
+    rec.getRecord(record,recId.slot);
     return SUCCESS;
 }
 int BlockAccess::insert(int relId, Attribute *record) {
@@ -277,13 +372,9 @@ int BlockAccess::insert(int relId, Attribute *record) {
         // if relation is RELCAT, do not allocate any more blocks
         //     return E_MAXRELATIONS;
         if(relId==RELCAT_RELID) return E_MAXRELATIONS;
+
         RecBuffer newblock;
         int ret2=newblock.getBlockNum();
-        // Otherwise,
-        // get a new record block (using the appropriate RecBuffer constructor!)
-        // get the block number of the newly allocated block
-        // (use BlockBuffer::getBlockNum() function)
-        // let ret be the return value of getBlockNum() function call
         if (ret2 == E_DISKFULL) {
             return E_DISKFULL;
         }
