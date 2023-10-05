@@ -7,6 +7,39 @@ AttrCacheEntry* AttrCacheTable::attrCache[MAX_OPEN];
 /* returns the attribute with name `attrName` for the relation corresponding to relId
 NOTE: this function expects the caller to allocate memory for `*attrCatBuf`
 */
+int AttrCacheTable::setSearchIndex(int relId, char attrName[ATTR_SIZE], IndexId *searchIndex) {
+
+  if(relId<0 or relId>=MAX_OPEN) {
+    return E_OUTOFBOUND;
+  }
+
+  if(attrCache[relId]==nullptr) {
+    return E_RELNOTOPEN;
+  }
+
+  for(AttrCacheEntry* entry=attrCache[relId];entry!=nullptr;entry=entry->next)
+  {
+    if (!strcmp(entry->attrCatEntry.attrName,attrName))
+    {
+      // copy the input searchIndex variable to the searchIndex field of the
+      //corresponding Attribute Cache entry in the Attribute Cache Table.
+      entry->searchIndex=*searchIndex;
+      return SUCCESS;
+    }
+  }
+
+  return E_ATTRNOTEXIST;
+}
+
+int AttrCacheTable::resetSearchIndex(int relId, char attrName[ATTR_SIZE]) {
+
+  // declare an IndexId having value {-1, -1}
+  // set the search index to {-1, -1} using AttrCacheTable::setSearchIndex
+  // return the value returned by setSearchIndex
+  IndexId ind1={-1,-1};
+  int retSet=AttrCacheTable::setSearchIndex(relId,attrName,&ind1);
+  return retSet;
+}
 int AttrCacheTable::getAttrCatEntry(int relId, char attrName[ATTR_SIZE], AttrCatEntry* attrCatBuf) {
 
   // check that relId is valid and corresponds to an open relation

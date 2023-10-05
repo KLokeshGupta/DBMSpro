@@ -69,7 +69,7 @@ int StaticBuffer::getFreeBuffer(int blockNum) {
     // let bufferNum be used to store the buffer number of the free/freed buffer.
     int bufferNum=999;
     int bufferindex;
-    int time1=0,ind=1000;
+    int time1=INT_MIN,ind=1000;
     for(bufferindex=0;bufferindex<BUFFER_CAPACITY;bufferindex++){
          if(!metainfo[bufferindex].free) {
           metainfo[bufferindex].timeStamp+=1;
@@ -130,7 +130,7 @@ int StaticBuffer::getBufferNum(int blockNum) {
   if(blockNum<0 || blockNum >=DISK_BLOCKS) return E_OUTOFBOUND;
   // and return E_OUTOFBOUND if not valid.
     for(int bufferIndex=0;bufferIndex<BUFFER_CAPACITY;bufferIndex++){
-        if(metainfo[bufferIndex].blockNum==blockNum) return bufferIndex;
+        if(!metainfo[bufferIndex].free and metainfo[bufferIndex].blockNum==blockNum) return bufferIndex;
     }
   // find and return the bufferIndex which corresponds to blockNum (check metainfo)
 

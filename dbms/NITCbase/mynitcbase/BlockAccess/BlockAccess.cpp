@@ -59,7 +59,7 @@ int BlockAccess::project(int relId, Attribute *record) {
         HeadInfo header1;
         rec1.getHeader(&header1);
         unsigned char slotmap[header1.numSlots];
-
+        rec1.getSlotMap(slotmap);
         if(/* slot >= the number of slots per block*/slot>=header1.numSlots)
         {
             // (no more slots in this block)
@@ -95,7 +95,8 @@ int BlockAccess::project(int relId, Attribute *record) {
        For this Instantiate a RecBuffer class object by passing the recId and
        call the appropriate method to fetch the record
     */
-
+   RecBuffer rec1(block);
+   rec1.getRecord(record,slot);
     return SUCCESS;
 }
 int BlockAccess::deleteRelation(char relName[ATTR_SIZE]) {
@@ -295,9 +296,7 @@ int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], 
     /* search for the record id (recid) corresponding to the attribute with
     attribute name attrName, with value attrval and satisfying the condition op
     using linearSearch() */
-    Attribute attrN;
-    strcpy(attrN.sVal,attrName);
-    recId=linearSearch(relId,attrName,attrN,EQ);
+    recId=linearSearch(relId,attrName,attrVal,op);
     // if there's no record satisfying the given condition (recId = {-1, -1})
     //    return E_NOTFOUND;
     if(recId.block==-1 and recId.slot==-1) return E_NOTFOUND;
