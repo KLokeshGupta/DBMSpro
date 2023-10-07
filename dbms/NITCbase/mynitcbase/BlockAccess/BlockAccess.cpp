@@ -201,9 +201,9 @@ int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], 
     /* search for the record id (recid) corresponding to the attribute with
     attribute name attrName, with value attrval and satisfying the condition op
     using linearSearch() */
-    Attribute attrN;
-    strcpy(attrN.sVal,attrName);
-    recId=linearSearch(relId,attrName,attrN,EQ);
+    // Attribute attrN;
+    // strcpy(attrN.sVal,attrName);
+    recId=linearSearch(relId,attrName,attrVal,op);
     // if there's no record satisfying the given condition (recId = {-1, -1})
     //    return E_NOTFOUND;
     if(recId.block==-1 and recId.slot==-1) return E_NOTFOUND;
