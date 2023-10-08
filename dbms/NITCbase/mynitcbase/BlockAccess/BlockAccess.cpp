@@ -288,26 +288,52 @@ int BlockAccess::deleteRelation(char relName[ATTR_SIZE]) {
 NOTE: This function will copy the result of the search to the `record` argument.
       The caller should ensure that space is allocated for `record` array
       based on the number of attributes in the relation.
-*/
+// */
 int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], Attribute attrVal, int op) {
     // Declare a variable called recid to store the searched record
     RecId recId;
 
-    /* search for the record id (recid) corresponding to the attribute with
-    attribute name attrName, with value attrval and satisfying the condition op
-    using linearSearch() */
-    recId=linearSearch(relId,attrName,attrVal,op);
+    /* get the attribute catalog entry from the attribute cache corresponding
+    to the relation with Id=relid and with attribute_name=attrName  */
+    AttrCatEntry attrCatEntry;
+    int ret=AttrCacheTable::getAttrCatEntry(ATTRCAT_RELID,attrName,&attrCatEntry);
+    if(ret!=SUCCESS) return ret;
+
+    // if this call returns an error, return the appropriate error code
+
+    // get rootBlock from the attribute catalog entry
+    /* if Index does not exist for the attribute (check rootBlock == -1) */if(attrCatEntry.rootBlock==-1) {
+
+        /* search for the record id (recid) corresponding to the attribute with
+           attribute name attrName, with value attrval and satisfying the
+           condition op using linearSearch()
+        */
+       recId=linearSearch(relId,attrName,attrVal,op);
+
+    }
+
+    /* else */ {
+        // (index exists for the attribute)
+
+        /* search for the record id (recid) correspoding to the attribute with
+        attribute name attrName and with value attrval and satisfying the
+        condition op using BPlusTree::bPlusSearch() */
+        recId=BPlusTree::bPlusSearch(relId,attrName,attrVal,op);
+    }
+
+
     // if there's no record satisfying the given condition (recId = {-1, -1})
-    //    return E_NOTFOUND;
+    //     return E_NOTFOUND;
     if(recId.block==-1 and recId.slot==-1) return E_NOTFOUND;
-    /* Copy the record with record id (recId) to the record buffer (record)
-       For this Instantiate a RecBuffer class object using recId and
+    /* Copy the record with record id (recId) to the record buffer (record).
+       For this, instantiate a RecBuffer class object by passing the recId and
        call the appropriate method to fetch the record
     */
-    RecBuffer rec(recId.block);
-    rec.getRecord(record,recId.slot);
+    RecBuffer recBuffer(recId.block);
+    recBuffer.getRecord(record,recId.slot);
     return SUCCESS;
 }
+
 int BlockAccess::insert(int relId, Attribute *record) {
     // get the relation catalog entry from relation cache
     // ( use RelCacheTable::getRelCatEntry() of Cache Layer)

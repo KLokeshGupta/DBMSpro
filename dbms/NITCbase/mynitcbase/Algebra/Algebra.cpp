@@ -232,7 +232,7 @@ int Algebra::select(char srcRel[ATTR_SIZE], char targetRel[ATTR_SIZE], char attr
     // get RelcatEntry of srcRel using RelCacheTable::getRelCatEntry()
     RelCatEntry relCatEntry;
     RelCacheTable::getRelCatEntry(srcrelId,&relCatEntry);
-    int src_nAttrs = /* the no. of attributes present in src relation */ relCatEntry.numAttrs;
+    int src_nAttrs =  relCatEntry.numAttrs;
 
 
     /* let attr_names[src_nAttrs][ATTR_SIZE] be a 2D array of type char
@@ -271,7 +271,6 @@ int Algebra::select(char srcRel[ATTR_SIZE], char targetRel[ATTR_SIZE], char attr
     /* Before calling the search function, reset the search to start from the
        first using RelCacheTable::resetSearchIndex() */
 
-    RelCacheTable::resetSearchIndex(srcrelId);
     Attribute record[src_nAttrs];
 
     /*
@@ -284,6 +283,7 @@ int Algebra::select(char srcRel[ATTR_SIZE], char targetRel[ATTR_SIZE], char attr
         Both these calls are necessary to ensure that search begins from the
         first record.
     */
+    RelCacheTable::resetSearchIndex(srcrelId);
     AttrCacheTable::resetSearchIndex(srcrelId,attr);
     // read every record that satisfies the condition by repeatedly calling
     // BlockAccess::search() until there are no more records to be read
