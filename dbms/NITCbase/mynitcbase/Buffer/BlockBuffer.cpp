@@ -133,8 +133,8 @@ int RecBuffer::setSlotMap(unsigned char *slotMap) {
     // the slotmap starts at bufferPtr + HEADER_SIZE. Copy the contents of the
     // argument `slotMap` to the buffer replacing the existing slotmap.
     // Note that size of slotmap is `numSlots`
-    bufferPtr+=HEADER_SIZE;
-    memcpy(bufferPtr,slotMap,numSlots);
+    unsigned char *slotptr=bufferPtr+HEADER_SIZE;
+    memcpy(slotptr,slotMap,numSlots);
     ret=StaticBuffer::setDirtyBit(this->blockNum);
     if(ret!=SUCCESS) return ret;
     return SUCCESS;

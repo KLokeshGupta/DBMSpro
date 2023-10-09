@@ -296,7 +296,7 @@ int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], 
     /* get the attribute catalog entry from the attribute cache corresponding
     to the relation with Id=relid and with attribute_name=attrName  */
     AttrCatEntry attrCatEntry;
-    int ret=AttrCacheTable::getAttrCatEntry(ATTRCAT_RELID,attrName,&attrCatEntry);
+    int ret=AttrCacheTable::getAttrCatEntry(relId,attrName,&attrCatEntry);
     if(ret!=SUCCESS) return ret;
 
     // if this call returns an error, return the appropriate error code
@@ -312,7 +312,7 @@ int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], 
 
     }
 
-    /* else */ {
+    else{
         // (index exists for the attribute)
 
         /* search for the record id (recid) correspoding to the attribute with
@@ -359,7 +359,7 @@ int BlockAccess::insert(int relId, Attribute *record) {
         RecBuffer rec(blockNum);
         HeadInfo head;
         rec.getHeader(&head);
-        unsigned char *slotmap=(unsigned char*)malloc(numOfSlots*sizeof(unsigned char));
+        unsigned char slotmap[numOfSlots];
         rec.getSlotMap(slotmap);
         // get header of block(blockNum) using RecBuffer::getHeader() function
 
@@ -408,16 +408,16 @@ int BlockAccess::insert(int relId, Attribute *record) {
        // RecId rec_id;
         rec_id.block=ret2;
         rec_id.slot=0;
-        HeadInfo head;
-        head.blockType=REC;
-        head.lblock=prevBlockNum;
-        head.rblock=-1;
-        head.numAttrs=numOfAttributes;
-        head.numSlots=numOfSlots;
-        head.numEntries=0;
-        head.pblock=-1;
-        newblock.setHeader(&head);
-        unsigned char *slotmap=(unsigned char*)malloc(sizeof(unsigned char)*numOfSlots);
+        HeadInfo head1;
+        head1.blockType=REC;
+        head1.lblock=prevBlockNum;
+        head1.rblock=-1;
+        head1.numAttrs=numOfAttributes;
+        head1.numSlots=numOfSlots;
+        head1.numEntries=0;
+        head1.pblock=-1;
+        newblock.setHeader(&head1);
+        unsigned char slotmap[numOfSlots];
         for(int j=0;j<numOfSlots;j++){
             slotmap[j]=SLOT_UNOCCUPIED;
         }
@@ -480,7 +480,7 @@ int BlockAccess::insert(int relId, Attribute *record) {
        which record was inserted as occupied) */
     // (ie store SLOT_OCCUPIED in free_slot'th entry of slot map)
     // (use RecBuffer::getSlotMap() and RecBuffer::setSlotMap() functions)
-        unsigned char *slotmap=(unsigned char*)malloc(sizeof(unsigned char)*numOfSlots);
+        unsigned char slotmap[numOfSlots];
         newblock1.getSlotMap(slotmap);
         slotmap[rec_id.slot]=SLOT_OCCUPIED;
          newblock1.setSlotMap(slotmap);
@@ -496,7 +496,6 @@ int BlockAccess::insert(int relId, Attribute *record) {
 
     // Increment the number of records field in the relation cache entry for
     // the relation. (use RelCacheTable::setRelCatEntry function)
-
     return SUCCESS;
 }
 int BlockAccess::renameAttribute(char relName[ATTR_SIZE], char oldName[ATTR_SIZE], char newName[ATTR_SIZE]) {

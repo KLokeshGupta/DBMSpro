@@ -136,14 +136,15 @@ RecId BPlusTree::bPlusSearch(int relId, char attrName[ATTR_SIZE], Attribute attr
             }
             if (/* such an entry is found*/reqEntry) {
                 // move to the left child of that entry
-                block = intHead.lblock;
+                block = intEntry.lChild;
 
             } else {
                 // move to the right child of the last entry of the block
                 // i.e numEntries - 1 th entry of the block
 
-                block =  intHead.numEntries-1;
-                //or we can use block=intEntry.rChild;
+                // block =  intHead.numEntries-1;
+                // or we can use 
+                block=intEntry.rChild;
             }
         }
     }
