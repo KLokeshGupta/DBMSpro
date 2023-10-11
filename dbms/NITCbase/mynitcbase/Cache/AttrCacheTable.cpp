@@ -7,6 +7,69 @@ AttrCacheEntry* AttrCacheTable::attrCache[MAX_OPEN];
 /* returns the attribute with name `attrName` for the relation corresponding to relId
 NOTE: this function expects the caller to allocate memory for `*attrCatBuf`
 */
+void AttrCacheTable::attrCatEntryToRecord(AttrCatEntry *attrCatEntry,union Attribute record[ATTRCAT_NO_ATTRS]){
+strcpy(record[ATTRCAT_REL_NAME_INDEX].sVal,attrCatEntry->relName);
+    strcpy(record[ATTRCAT_ATTR_NAME_INDEX].sVal,attrCatEntry->attrName);
+    record[ATTRCAT_ATTR_TYPE_INDEX].nVal=(int)attrCatEntry->attrType;
+    record[ATTRCAT_PRIMARY_FLAG_INDEX].nVal=(bool)attrCatEntry->primaryFlag;
+    record[ATTRCAT_OFFSET_INDEX].nVal=(int)attrCatEntry->offset;
+    record[ATTRCAT_ROOT_BLOCK_INDEX].nVal=(int)attrCatEntry->rootBlock;
+
+}
+int AttrCacheTable::setAttrCatEntry(int relId, char attrName[ATTR_SIZE], AttrCatEntry *attrCatBuf) {
+
+  if(relId<0 or relId>=MAX_OPEN) {
+    return E_OUTOFBOUND;
+  }
+
+  if(attrCache[relId]==nullptr) {
+    return E_RELNOTOPEN;
+  }
+
+  for(AttrCacheEntry *entry=attrCache[relId];entry!=nullptr;entry=entry->next)
+  {
+    if(!strcmp(entry->attrCatEntry.attrName,attrName))
+    {
+      // copy the attrCatBuf to the corresponding Attribute Catalog entry in
+      // the Attribute Cache Table.
+      entry->attrCatEntry=*attrCatBuf;
+      entry->dirty=true;
+      // set the dirty flag of the corresponding Attribute Cache entry in the
+      // Attribute Cache Table.
+
+      return SUCCESS;
+    }
+  }
+
+  return E_ATTRNOTEXIST;
+}
+int AttrCacheTable::setAttrCatEntry(int relId, int attrOffset, AttrCatEntry *attrCatBuf) {
+
+  if(relId<0 or relId>=MAX_OPEN) {
+    return E_OUTOFBOUND;
+  }
+
+  if(attrCache[relId]==nullptr) {
+    return E_RELNOTOPEN;
+  }
+
+  for(AttrCacheEntry *entry=attrCache[relId];entry!=nullptr;entry=entry->next)
+  {
+    if(entry->attrCatEntry.offset==attrOffset)
+    {
+      // copy the attrCatBuf to the corresponding Attribute Catalog entry in
+      // the Attribute Cache Table.
+      entry->attrCatEntry=*attrCatBuf;
+      entry->dirty=true;
+      // set the dirty flag of the corresponding Attribute Cache entry in the
+      // Attribute Cache Table.
+
+      return SUCCESS;
+    }
+  }
+
+  return E_ATTRNOTEXIST;
+}
 int AttrCacheTable::getSearchIndex(int relId, char attrName[ATTR_SIZE], IndexId *searchIndex) {
 
   if(relId<0 or relId>=12) {
@@ -169,7 +232,7 @@ void AttrCacheTable::recordToAttrCatEntry(union Attribute record[ATTRCAT_NO_ATTR
   strcpy(attrCatEntry->relName, record[ATTRCAT_REL_NAME_INDEX].sVal);
     strcpy(attrCatEntry->attrName,record[ATTRCAT_ATTR_NAME_INDEX].sVal);
     attrCatEntry->attrType=(int)record[ATTRCAT_ATTR_TYPE_INDEX].nVal;
-    attrCatEntry->primaryFlag=(bool)record[ATTRCAT_PRIMARY_FLAG_INDEX].sVal;
+    attrCatEntry->primaryFlag=(bool)record[ATTRCAT_PRIMARY_FLAG_INDEX].nVal;
     attrCatEntry->offset=(int)record[ATTRCAT_OFFSET_INDEX].nVal;
     attrCatEntry->rootBlock=(int)record[ATTRCAT_ROOT_BLOCK_INDEX].nVal;
   // copy the rest of the fields in the record to the attrCacheEntry struct
