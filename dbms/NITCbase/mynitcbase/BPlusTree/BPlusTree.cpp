@@ -256,6 +256,7 @@ int BPlusTree::insertIntoInternal(int relId, char attrName[ATTR_SIZE], int intBl
 
     // if either of the above calls returned an error (E_DISKFULL), then return that
     // else return SUCCESS
+    std::cout<<"%";
     return SUCCESS;
 }
 
@@ -413,6 +414,7 @@ int BPlusTree::insertIntoLeaf(int relId, char attrName[ATTR_SIZE], int blockNum,
 
     // if either of the above calls returned an error (E_DISKFULL), then return that
     // else return SUCCESS
+    std::cout<<"$";
     return SUCCESS;
 }
 
