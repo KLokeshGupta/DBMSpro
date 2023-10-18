@@ -298,7 +298,7 @@ int BlockAccess::search(int relId, Attribute *record, char attrName[ATTR_SIZE], 
     AttrCatEntry attrCatEntry;
     int ret=AttrCacheTable::getAttrCatEntry(relId,attrName,&attrCatEntry);
     if(ret!=SUCCESS) return ret;
-
+    // recId=linearSearch(relId,attrName,attrVal,op);
     // if this call returns an error, return the appropriate error code
 
     // get rootBlock from the attribute catalog entry
@@ -657,6 +657,7 @@ RecId BlockAccess::linearSearch(int relId, char attrName[ATTR_SIZE], union Attri
     // (use RelCacheTable::getSearchIndex() function)
     RecId prevRecId;
     RelCacheTable::getSearchIndex(relId,&prevRecId);
+    int count=0;
     // let block and slot denote the record id of the record being currently checked
     int block,slot;
     // if the current search index record is invalid(i.e. both block and slot = -1)
@@ -748,6 +749,7 @@ RecId BlockAccess::linearSearch(int relId, char attrName[ATTR_SIZE], union Attri
         // set cmpVal using compareAttrs()
         
         cmpVal=compareAttrs(record,attrVal,attrcatbuff.attrType);
+        count++;
         /* Next task is to check whether this record satisfies the given condition.
            It is determined based on the output of previous comparison and
            the op value received.
@@ -769,6 +771,7 @@ RecId BlockAccess::linearSearch(int relId, char attrName[ATTR_SIZE], union Attri
            RecId id;
             id={block,slot};
             RelCacheTable::setSearchIndex(relId,&id);
+            std::cout<<count<<std::endl;
             return RecId{block, slot};
         }
 
@@ -776,5 +779,6 @@ RecId BlockAccess::linearSearch(int relId, char attrName[ATTR_SIZE], union Attri
     }
 
     // no record in the relation with Id relid satisfies the given condition
+    std::cout<<count<<std::endl;
     return RecId{-1, -1};
 }
