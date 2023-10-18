@@ -65,7 +65,7 @@ int IndLeaf::setEntry(void *ptr, int indexNum) {
 
     // if the indexNum is not in the valid range of [0, MAX_KEYS_LEAF-1]
     //     return E_OUTOFBOUND.
-    if(indexNum<0 or indexNum>=MAX_KEYS_INTERNAL) return E_OUTOFBOUND;
+    if(indexNum<0 or indexNum>=MAX_KEYS_LEAF) return E_OUTOFBOUND;
     unsigned char *bufferPtr;
     /* get the starting address of the buffer containing the block
        using loadBlockAndGetBufferPtr(&bufferPtr). */
@@ -94,7 +94,7 @@ int IndLeaf::getEntry(void *ptr, int indexNum) {
 
     // if the indexNum is not in the valid range of [0, MAX_KEYS_LEAF-1]
     //     return E_OUTOFBOUND.
-    if(indexNum <0 or indexNum>=MAX_KEYS_INTERNAL) return E_OUTOFBOUND;
+    if(indexNum <0 or indexNum>=MAX_KEYS_LEAF) return E_OUTOFBOUND;
   
     unsigned char *bufferPtr;
     /* get the starting address of the buffer containing the block
