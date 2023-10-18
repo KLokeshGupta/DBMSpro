@@ -382,7 +382,7 @@ int BPlusTree::insertIntoLeaf(int relId, char attrName[ATTR_SIZE], int blockNum,
     // if splitLeaf() returned E_DISKFULL
     //     return E_DISKFULL
     if(newRightBlk==E_DISKFULL) return E_DISKFULL;
-    if (/* the current leaf block was not the root */blockHeader.pblock!=-1) {  // check pblock in header
+    if (/* the current leaf block was not the root */blockNum!=attrCatEntry.rootBlock) {  // check pblock in header
         // insert the middle value from `indices` into the parent block using the
         // insertIntoInternal() function. (i.e the last value of the left block)
         int pblock=blockHeader.pblock;
