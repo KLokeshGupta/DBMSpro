@@ -753,7 +753,7 @@ RecId BPlusTree::bPlusSearch(int relId, char attrName[ATTR_SIZE], Attribute attr
             while(new_index<intHead.numEntries){
                 int ret=internalBlk.getEntry(&intEntry,new_index);
                 int cmpVal=compareAttrs(intEntry.attrVal,attrVal,type1);
-                if((op == EQ && cmpVal == 0) ||
+                if((op == EQ && cmpVal >= 0) ||
                 (op == GT && cmpVal > 0) ||
                 (op == GE && cmpVal >= 0)){
                     reqEntry=true;
