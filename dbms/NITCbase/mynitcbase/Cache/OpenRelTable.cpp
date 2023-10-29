@@ -49,21 +49,22 @@ int OpenRelTable::closeRel(int relId) {
   //   free(entry);
   // }
   AttrCacheEntry* entry=AttrCacheTable::attrCache[relId];
-  AttrCacheEntry* temp=nullptr;
-  int k=0;
-  while(entry!=nullptr){
-    k++;
-    temp=entry;
-    if(entry->next!=nullptr){
-      entry=entry->next;
-    free(temp);
+  AttrCacheEntry* temp=entry->next;
+  while(true){
 
+		if(entry->dirty){
+			Attribute rec[ATTRCAT_NO_ATTRS];
+			AttrCacheTable::attrCatEntryToRecord(&entry->attrCatEntry,rec);
+			RecId recId=entry->recId;
+			RecBuffer attrBuffer(recId.block);
+			attrBuffer.setRecord(rec,recId.slot);
+		}
+      free(entry);
+	  entry=temp;
+	  if(entry==nullptr) break;
+	  temp=temp->next;
     }
-    else{
-      free(temp);
-      break;
-    }
-  }
+  
   //free(AttrCacheTable::attrCache[relId]);
 
   /****** Set the Open Relation Table entry of the relation as free ******/
@@ -378,8 +379,3 @@ int OpenRelTable::getRelId(char relName[ATTR_SIZE]) {
   // if(!strcmp(relName,ATTRCAT_RELNAME)) return 1;
   return E_RELNOTOPEN;
 }
-
-
-
-
-
