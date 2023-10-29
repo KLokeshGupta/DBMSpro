@@ -256,7 +256,6 @@ int BPlusTree::insertIntoInternal(int relId, char attrName[ATTR_SIZE], int intBl
 
     // if either of the above calls returned an error (E_DISKFULL), then return that
     // else return SUCCESS
-    std::cout<<"%";
     return SUCCESS;
 }
 
@@ -280,6 +279,7 @@ int BPlusTree::splitLeaf(int leafBlockNum, Index indices[]) {
     // get the headers of left block and right block using BlockBuffer::getHeader()
     newRightBlock.getHeader(&rightBlkHeader);
     newleftBlk.getHeader(&leftBlkHeader);
+    rightBlkHeader.blockType=leftBlkHeader.blockType;
     rightBlkHeader.numEntries=32;
     rightBlkHeader.pblock=leftBlkHeader.pblock;
     rightBlkHeader.lblock=leftBlkNum;
@@ -357,6 +357,9 @@ int BPlusTree::insertIntoLeaf(int relId, char attrName[ATTR_SIZE], int blockNum,
         indices[k]=entry;
         k++;
     }
+    if(flag==0){
+        indices[k]=indexEntry;
+    }
     if (blockHeader.numEntries != MAX_KEYS_LEAF) {
         // (leaf block has not reached max limit)
         blockHeader.numEntries+=1;
@@ -383,7 +386,7 @@ int BPlusTree::insertIntoLeaf(int relId, char attrName[ATTR_SIZE], int blockNum,
     // if splitLeaf() returned E_DISKFULL
     //     return E_DISKFULL
     if(newRightBlk==E_DISKFULL) return E_DISKFULL;
-    if (/* the current leaf block was not the root */blockNum!=attrCatEntry.rootBlock) {  // check pblock in header
+    if (/* the current leaf block was not the root */blockHeader.pblock!=-1) {  // check pblock in header
         // insert the middle value from `indices` into the parent block using the
         // insertIntoInternal() function. (i.e the last value of the left block)
         int pblock=blockHeader.pblock;
@@ -414,7 +417,6 @@ int BPlusTree::insertIntoLeaf(int relId, char attrName[ATTR_SIZE], int blockNum,
 
     // if either of the above calls returned an error (E_DISKFULL), then return that
     // else return SUCCESS
-    std::cout<<"$";
     return SUCCESS;
 }
 
@@ -433,7 +435,7 @@ int BPlusTree::findLeafToInsert(int rootBlock, Attribute attrVal, int attrType) 
         InternalEntry intEntry;
         for(int i=0;i<header.numEntries;i++){
             intBuffer.getEntry(&intEntry,i);
-            if(compareAttrs(intEntry.attrVal,attrVal,attrType)>=0){
+            if(compareAttrs(intEntry.attrVal,attrVal,attrType)<=0){
                 reqEntry=true;
                 break;
             }
@@ -756,11 +758,8 @@ RecId BPlusTree::bPlusSearch(int relId, char attrName[ATTR_SIZE], Attribute attr
                 int ret=internalBlk.getEntry(&intEntry,index);
                 int cmpVal=compareAttrs(intEntry.attrVal,attrVal,type1);
                 if((op == EQ && cmpVal == 0) ||
-                (op == LE && cmpVal <= 0) ||
-                (op == LT && cmpVal < 0) ||
                 (op == GT && cmpVal > 0) ||
-                (op == GE && cmpVal >= 0) ||
-                (op == NE && cmpVal != 0)){
+                (op == GE && cmpVal >= 0)){
                     reqEntry=true;
                     break;
                 }
