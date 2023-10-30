@@ -1,7 +1,14 @@
+echo ----Creating new relations----
+CREATE TABLE Events(id NUM, title STR, location STR);
+CREATE TABLE Locations(name STR, capacity NUM);
+CREATE TABLE Participants(regNo NUM, event STR);
 echo ----populating new relations----
 OPEN TABLE Events;
+INSERT INTO Events VALUES FROM events.csv;
 OPEN TABLE Locations;
+INSERT INTO Locations VALUES FROM locations.csv;
 OPEN TABLE Participants;
+INSERT INTO Participants VALUES FROM participants.csv;
 echo --------------------------------------------
 echo ----JOINING----
 SELECT name FROM Locations JOIN Events INTO EventLocations WHERE Locations.name = Events.location;

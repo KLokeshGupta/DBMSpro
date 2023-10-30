@@ -84,8 +84,8 @@ int BPlusTree::insertIntoInternal(int relId, char attrName[ATTR_SIZE], int intBl
         // Using bPlusDestroy(), destroy the right subtree, rooted at intEntry.rChild.
         // This corresponds to the tree built up till now that has not yet been
         // connected to the existing B+ Tree
-        ret=BPlusTree::bPlusDestroy(intEntry.rChild);
-        if(ret!=SUCCESS) return ret;
+        BPlusTree::bPlusDestroy(intEntry.rChild);
+       
         return E_DISKFULL;
     }
 
@@ -97,8 +97,8 @@ int BPlusTree::insertIntoInternal(int relId, char attrName[ATTR_SIZE], int intBl
         entry.lChild=intBlockNum;
         entry.rChild=newRightBlk;
         entry.attrVal=internalEntries[MIDDLE_INDEX_INTERNAL].attrVal;
-        ret=insertIntoInternal(relId,attrName,pblock,entry);
-        if(ret<0 or ret>=DISK_BLOCKS) return E_DISKFULL;
+        return insertIntoInternal(relId,attrName,pblock,entry);
+        
         // the middle value will be at index 50 (given by constant MIDDLE_INDEX_INTERNAL)
 
         // create a struct InternalEntry with lChild = current block, rChild = newRightBlk
@@ -115,13 +115,12 @@ int BPlusTree::insertIntoInternal(int relId, char attrName[ATTR_SIZE], int intBl
         // createNewRoot(relId, attrName,
         //               internalEntries[MIDDLE_INDEX_INTERNAL].attrVal,
         //               current block, new right block)
-        ret=createNewRoot(relId,attrName,internalEntries[MIDDLE_INDEX_INTERNAL].attrVal,intBlockNum,newRightBlk);
-        if(ret<0 or ret>=DISK_BLOCKS) return E_DISKFULL;
+        return createNewRoot(relId,attrName,internalEntries[MIDDLE_INDEX_INTERNAL].attrVal,intBlockNum,newRightBlk);
+
     }
 
     // if either of the above calls returned an error (E_DISKFULL), then return that
     // else return SUCCESS
-    return SUCCESS;
 }
 int BPlusTree::createNewRoot(int relId, char attrName[ATTR_SIZE], Attribute attrVal, int lChild, int rChild) {
     // get the attribute cache entry corresponding to attrName
@@ -141,7 +140,7 @@ int BPlusTree::createNewRoot(int relId, char attrName[ATTR_SIZE], Attribute attr
         // Using bPlusDestroy(), destroy the right subtree, rooted at rChild.
         // This corresponds to the tree built up till now that has not yet been
         // connected to the existing B+ Tree
-        BPlusTree::bPlusDestroy(newRootBlkNum);
+        BPlusTree::bPlusDestroy(rChild);
         return E_DISKFULL;
     }
 
@@ -365,7 +364,7 @@ int BPlusTree::insertIntoLeaf(int relId, char attrName[ATTR_SIZE], int blockNum,
         // iterate through all the entries of the array `indices` and populate the
         // entries of block with them using IndLeaf::setEntry().
         for(int i=0;i<blockHeader.numEntries;i++){
-            leafBuffer.setEntry(&indices,i);
+            leafBuffer.setEntry(&indices[i],i);
         }
         return SUCCESS;
     }
@@ -430,7 +429,7 @@ int BPlusTree::findLeafToInsert(int rootBlock, Attribute attrVal, int attrType) 
         InternalEntry intEntry;
         for(int i=0;i<header.numEntries;i++){
             intBuffer.getEntry(&intEntry,i);
-            if(compareAttrs(intEntry.attrVal,attrVal,attrType)<=0){
+            if(compareAttrs(attrVal,intEntry.attrVal,attrType)<=0){
                 reqEntry=true;
                 break;
             }
@@ -748,11 +747,10 @@ RecId BPlusTree::bPlusSearch(int relId, char attrName[ATTR_SIZE], Attribute attr
             //     type1=STRING;
             // }
             // else type1=NUMBER;
-            type1=NUMBER;
             bool reqEntry=false;
             while(new_index<intHead.numEntries){
                 int ret=internalBlk.getEntry(&intEntry,new_index);
-                int cmpVal=compareAttrs(intEntry.attrVal,attrVal,type1);
+                int cmpVal=compareAttrs(intEntry.attrVal,attrVal,attrCatEntry.attrType);
                 if((op == EQ && cmpVal >= 0) ||
                 (op == GT && cmpVal > 0) ||
                 (op == GE && cmpVal >= 0)){
@@ -798,14 +796,12 @@ RecId BPlusTree::bPlusSearch(int relId, char attrName[ATTR_SIZE], Attribute attr
             // load entry corresponding to block and index into leafEntry
             // using IndLeaf::getEntry().
             leafBlk.getEntry(&leafEntry,index);
-            int type1;
             // if(!isNumber(attrVal.sVal)){
             //     type1=STRING;
             // }
             // else type1=NUMBER;
-            type1=NUMBER;
             int cmpVal = /* comparison between leafEntry's attribute value
-                            and input attrVal using compareAttrs()*/compareAttrs(leafEntry.attrVal,attrVal,type1);
+                            and input attrVal using compareAttrs()*/compareAttrs(leafEntry.attrVal,attrVal,attrCatEntry.attrType);
 
             if (
                 (op == EQ && cmpVal == 0) ||
