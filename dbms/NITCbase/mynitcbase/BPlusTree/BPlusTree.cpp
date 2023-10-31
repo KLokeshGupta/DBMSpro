@@ -113,16 +113,10 @@ RecId BPlusTree::bPlusSearch(int relId, char attrName[ATTR_SIZE], Attribute attr
              Hint: the helper function compareAttrs() can be used for comparing
             */
            index=0;
-           int type1;
-            // if(!isNumber(attrVal.sVal)){
-            //     type1=STRING;
-            // }
-            // else type1=NUMBER;
-            type1=NUMBER;
             bool reqEntry=false;
             while(index<intHead.numEntries){
                 int ret=internalBlk.getEntry(&intEntry,index);
-                int cmpVal=compareAttrs(intEntry.attrVal,attrVal,type1);
+                int cmpVal=compareAttrs(intEntry.attrVal,attrVal,attrCatEntry.attrType);
                 count++;
                 if((op == EQ && cmpVal == 0)||
                 (op == GT && cmpVal > 0) ||
@@ -169,14 +163,8 @@ RecId BPlusTree::bPlusSearch(int relId, char attrName[ATTR_SIZE], Attribute attr
             // load entry corresponding to block and index into leafEntry
             // using IndLeaf::getEntry().
             leafBlk.getEntry(&leafEntry,index);
-            int type1;
-            // if(!isNumber(attrVal.sVal)){
-            //     type1=STRING;
-            // }
-            // else type1=NUMBER;
-            type1=NUMBER;
             int cmpVal = /* comparison between leafEntry's attribute value
-                            and input attrVal using compareAttrs()*/compareAttrs(leafEntry.attrVal,attrVal,type1);
+                            and input attrVal using compareAttrs()*/compareAttrs(leafEntry.attrVal,attrVal,attrCatEntry.attrType);
                 count++;
             if (
                 (op == EQ && cmpVal == 0) ||
