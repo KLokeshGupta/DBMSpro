@@ -1,0 +1,5 @@
+drop table Fun
+create table Fun(name1 STR,id1 NUM)
+open table Fun
+insert into Fun values from exe.csv
+create index on Fun.id1

@@ -1,0 +1,161 @@
+----- B+ TREE BLOCKS -----
+BLOCK 66
+Block Type: IND_INTERNAL
+Parent Block: -1
+No of entries: 3
+lchild: 37, key_val: 9.00, rchild: 37
+lchild: 37, key_val: 9.00, rchild: 37
+lchild: 37, key_val: 9.00, rchild: 70
+---------
+BLOCK 37
+Block Type: IND_LEAF
+Parent Block: 66
+No of entries: 32
+left node: -1, right node: 70
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+---------
+BLOCK 37
+Block Type: IND_LEAF
+Parent Block: 66
+No of entries: 32
+left node: -1, right node: 70
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+---------
+BLOCK 37
+Block Type: IND_LEAF
+Parent Block: 66
+No of entries: 32
+left node: -1, right node: 70
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+---------
+BLOCK 70
+Block Type: IND_LEAF
+Parent Block: 66
+No of entries: 32
+left node: 37, right node: 69
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+key_val: 9.00
+---------

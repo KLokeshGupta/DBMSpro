@@ -35,8 +35,8 @@ int BPlusTree::insertIntoInternal(int relId, char attrName[ATTR_SIZE], int intBl
         int retVal=compareAttrs(entry.attrVal,intEntry.attrVal,attrCatEntry.attrType);
         if(retVal>0 and flag==0){
             internalEntries[k]=intEntry;
-            k++;
             inserted_index=k;
+            k++;
             flag=1;
         }
         internalEntries[k]=entry;
@@ -46,13 +46,16 @@ int BPlusTree::insertIntoInternal(int relId, char attrName[ATTR_SIZE], int intBl
         internalEntries[blockHeader.numEntries]=intEntry;
         inserted_index=blockHeader.numEntries;
     }
+    int a=-1;
     if(inserted_index>0){
-        internalEntries[inserted_index-1].rChild=intEntry.lChild;
+        a=internalEntries[inserted_index-1].rChild;
+        internalEntries[inserted_index-1].rChild=intEntry.rChild;
+        internalEntries[inserted_index].rChild=a;
+        internalEntries[inserted_index].lChild=intEntry.rChild;
     }
     if(inserted_index<blockHeader.numEntries){
         internalEntries[inserted_index+1].lChild=intEntry.rChild;
     }
-    
     if (blockHeader.numEntries <MAX_KEYS_INTERNAL) {
         // (internal index block has not reached max limit)
         blockHeader.numEntries+=1;
@@ -389,7 +392,7 @@ int BPlusTree::insertIntoLeaf(int relId, char attrName[ATTR_SIZE], int blockNum,
         entry.lChild=blockNum;
         entry.rChild=newRightBlk;
         ret=insertIntoInternal(relId,attrName,pblock,entry);
-        if(ret<0 or ret>=DISK_BLOCKS) return E_DISKFULL;
+if(ret<0 or ret>=DISK_BLOCKS) return E_DISKFULL;
         // the middle value will be at index 31 (given by constant MIDDLE_INDEX_LEAF)
 
         // create a struct InternalEntry with attrVal = indices[MIDDLE_INDEX_LEAF].attrVal,
